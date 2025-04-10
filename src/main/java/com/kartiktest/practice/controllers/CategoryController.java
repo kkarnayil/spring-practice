@@ -2,12 +2,11 @@ package com.kartiktest.practice.controllers;
 
 import com.kartiktest.practice.model.Category;
 import com.kartiktest.practice.service.CategoryService;
+import jakarta.validation.Valid;
 import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class CategoryController {
@@ -24,27 +23,19 @@ public class CategoryController {
   }
 
   @PostMapping("/api/public/v1/categories")
-  public ResponseEntity<List<Category>> addCategory(@RequestBody Category category) {
+  public ResponseEntity<String> addCategory(@Valid @RequestBody Category category) {
     return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(category));
   }
 
   @PutMapping("/api/public/v1/categories/{categoryId}")
   public ResponseEntity<String> updateCategory(
       @RequestBody Category category, @PathVariable long categoryId) {
-    try {
-      return ResponseEntity.status(HttpStatus.ACCEPTED)
-          .body(categoryService.updateCategory(category, categoryId));
-    } catch (ResponseStatusException e) {
-      return new ResponseEntity<>(e.getReason(), e.getStatusCode());
-    }
+    return ResponseEntity.status(HttpStatus.ACCEPTED)
+        .body(categoryService.updateCategory(category, categoryId));
   }
 
   @DeleteMapping("/api/admin/v1/categories/{categoryId}")
   public ResponseEntity<String> deleteCategory(@PathVariable long categoryId) {
-    try {
-      return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
-    } catch (ResponseStatusException e) {
-      return new ResponseEntity<>(e.getReason(), e.getStatusCode());
-    }
+    return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
   }
 }
