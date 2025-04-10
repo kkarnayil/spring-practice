@@ -1,58 +1,55 @@
 package com.kartiktest.practice.service.impl;
 
 import com.kartiktest.practice.model.Category;
+import com.kartiktest.practice.repositorties.CategoryRepository;
 import com.kartiktest.practice.service.CategoryService;
+import java.util.List;
+
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
+@AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-  private final List<Category> categories = new ArrayList<>();
-  private int id = 1;
+  private final CategoryRepository categoryRepository;
 
   @Override
   public List<Category> getCategories() {
-    return categories;
+    return categoryRepository.findAll();
   }
 
   @Override
   public List<Category> createCategory(final Category category) {
-    category.setId(id++);
-    categories.add(category);
-    return categories;
+    categoryRepository.save(category);
+    return categoryRepository.findAll();
   }
 
   @Override
   public String updateCategory(final Category category, long categoryId) {
 
-    final Category filteredCategory = categories.stream()
-        .filter(item -> item.getId() == categoryId)
-        .findFirst()
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-
-    filteredCategory.setName(category.getName());
-    filteredCategory.setDescription(category.getDescription());
-    return "Category updated: "+filteredCategory.getId();
-
+    final Category filteredCategory = getCategory(categoryId);
+    category.setId(filteredCategory.getId());
+    categoryRepository.save(category);
+    return "Category updated: " + filteredCategory.getId();
   }
 
   @Override
   public String deleteCategory(final long categoryId) {
 
-    final Category category =
-        categories.stream()
-            .filter(categoryItem -> categoryItem.getId() == categoryId)
-            .findFirst()
-            .orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+    final Category category = getCategory(categoryId);
 
-    categories.remove(category);
+    categoryRepository.delete(category);
 
     return "Category " + categoryId + " deleted";
+  }
+
+  private Category getCategory(final long categoryId) {
+      return categoryRepository
+          .findById(categoryId)
+          .orElseThrow(
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
   }
 }
