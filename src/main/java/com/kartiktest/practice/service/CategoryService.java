@@ -1,14 +1,17 @@
 package com.kartiktest.practice.service;
 
-import com.kartiktest.practice.model.Category;
-import java.util.List;
+import com.kartiktest.practice.dto.CategoryDTO;
+import com.kartiktest.practice.dto.CategoryResponse;
+import jakarta.validation.Valid;
 
 public interface CategoryService {
-  List<Category> getCategories();
 
-  String createCategory(final Category category);
+  CategoryResponse getCategories(
+      Integer pageNumber, Integer pageSize, String sortBy, String sortOrder);
 
-  String updateCategory(final Category category, long categoryId);
+  CategoryDTO createCategory(final @Valid CategoryDTO category);
 
-  String deleteCategory(final long categoryId);
+  CategoryDTO updateCategory(final CategoryDTO category, long categoryId);
+
+  CategoryDTO deleteCategory(final long categoryId);
 }

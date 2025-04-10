@@ -1,14 +1,16 @@
 package com.kartiktest.practice.controllers;
 
-import com.kartiktest.practice.model.Category;
+import com.kartiktest.practice.common.AppConstants;
+import com.kartiktest.practice.dto.CategoryDTO;
+import com.kartiktest.practice.dto.CategoryResponse;
 import com.kartiktest.practice.service.CategoryService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class CategoryController {
 
   private final CategoryService categoryService;
@@ -17,25 +19,35 @@ public class CategoryController {
     this.categoryService = categoryService;
   }
 
-  @GetMapping("/api/public/v1/categories")
-  public ResponseEntity<List<Category>> getCategories() {
-    return ResponseEntity.ok(categoryService.getCategories());
+  @GetMapping("/public/v1/categories")
+  public ResponseEntity<CategoryResponse> getCategories(
+      @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER_DEFAULT)
+          Integer pageNumber,
+      @RequestParam(name = "pageSize", defaultValue = AppConstants.PAGE_SIZE_DEFAULT)
+          Integer pageSize,
+      @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_ORDER_BY_DEFAULT)
+          String sortBy,
+      @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_ORDER_DEFAULT)
+          String sortOrder) {
+
+    return ResponseEntity.ok(
+        categoryService.getCategories(pageNumber, pageSize, sortBy, sortOrder));
   }
 
-  @PostMapping("/api/public/v1/categories")
-  public ResponseEntity<String> addCategory(@Valid @RequestBody Category category) {
+  @PostMapping("/public/v1/categories")
+  public ResponseEntity<CategoryDTO> addCategory(@Valid @RequestBody CategoryDTO category) {
     return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.createCategory(category));
   }
 
-  @PutMapping("/api/public/v1/categories/{categoryId}")
-  public ResponseEntity<String> updateCategory(
-      @RequestBody Category category, @PathVariable long categoryId) {
+  @PutMapping("/public/v1/categories/{categoryId}")
+  public ResponseEntity<CategoryDTO> updateCategory(
+      @RequestBody CategoryDTO category, @PathVariable long categoryId) {
     return ResponseEntity.status(HttpStatus.ACCEPTED)
         .body(categoryService.updateCategory(category, categoryId));
   }
 
-  @DeleteMapping("/api/admin/v1/categories/{categoryId}")
-  public ResponseEntity<String> deleteCategory(@PathVariable long categoryId) {
+  @DeleteMapping("/admin/v1/categories/{categoryId}")
+  public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable long categoryId) {
     return ResponseEntity.ok(categoryService.deleteCategory(categoryId));
   }
 }

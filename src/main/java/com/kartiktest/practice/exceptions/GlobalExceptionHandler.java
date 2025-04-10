@@ -1,5 +1,7 @@
 package com.kartiktest.practice.exceptions;
 
+import com.kartiktest.practice.dto.ApiErrorResponse;
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -33,15 +35,34 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<Map<String, String>> myConstraintViolationException(
+      ConstraintViolationException e) {
+
+    final Map<String, String> response = new HashMap<>();
+
+    e.getConstraintViolations()
+        .forEach(
+            constraintViolation ->
+                response.put(
+                    constraintViolation.getPropertyPath().toString(),
+                    constraintViolation.getMessage()));
+    return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<String> resourceNotFoundHandler(ResourceNotFoundException e) {
+  public ResponseEntity<ApiErrorResponse> resourceNotFoundHandler(ResourceNotFoundException e) {
+    final String message = e.getMessage();
     log.error(e.getMessage());
-    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    ApiErrorResponse apiErrorResponse = new ApiErrorResponse(message, false);
+    return new ResponseEntity<>(apiErrorResponse, HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<String> apiException(ApiException e) {
+  public ResponseEntity<ApiErrorResponse> apiException(ApiException e) {
+    final String message = e.getMessage();
     log.error(e.getMessage());
-    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    ApiErrorResponse apiErrorResponse = new ApiErrorResponse(message, false);
+    return new ResponseEntity<>(apiErrorResponse, HttpStatus.BAD_REQUEST);
   }
 }
